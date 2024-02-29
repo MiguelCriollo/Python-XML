@@ -31,7 +31,8 @@ class mainMenu:
     def consultar(self):
         datos=(self.codigo.get(), )
         print(datos)
-        respuesta=self.articulo1.personByIdentification(datos)
+        respuesta=self.articulo1.personLikeIdentification(datos)
+        print('JSJSJS=>',self.articulo1.personLikeIdentification(datos))
         if respuesta:
             print("Fila seleccionada:", respuesta)
             # Crear una ventana
@@ -39,15 +40,23 @@ class mainMenu:
             ventana_resultado.title("Resultados de la consulta")
 
             # Crear un Treeview en la ventana
-            self.tree_resultado = ttk.Treeview(ventana_resultado, columns=("ID", "First Name", "Last Name"))
+            self.tree_resultado = ttk.Treeview(ventana_resultado, columns=("ID","Identification", "First Name", "Last Name", "Type Control"))
             self.tree_resultado.heading("ID", text="ID")
+            self.tree_resultado.heading("Identification", text="Identification")
             self.tree_resultado.heading("First Name", text="First Name")
             self.tree_resultado.heading("Last Name", text="Last Name")
+            self.tree_resultado.heading("Type Control", text="Type Control")
             self.tree_resultado.grid(row=0, column=0, sticky="nsew")
 
             # Agregar datos al Treeview
             if respuesta:
-                self.tree_resultado.insert("", "end", values=respuesta)
+                for row in self.tree.get_children():
+                    self.tree_resultado.delete(row)
+
+                # Insertar datos en la tabla
+                for index, fila in enumerate(respuesta, start=1):
+                    self.tree_resultado.insert("", "end", values=fila)
+
             self.tree_resultado.bind("<Double-1>", self.on_treeview_click_consulta)
             # Configurar el Scrollbar
             scroll_resultado = ttk.Scrollbar(ventana_resultado, orient="vertical", command=self.tree_resultado.yview)
@@ -70,9 +79,10 @@ class mainMenu:
         self.pagina3 = ttk.Frame(self.cuaderno1)
         self.cuaderno1.add(self.pagina3, text="Listado completo")
 
-        self.tree = ttk.Treeview(self.pagina3, columns=("ID", "First Name", "Last Name"))
+        self.tree = ttk.Treeview(self.pagina3, columns=("ID", "First Name", "Type Control","Last Name"))
         self.tree.heading("ID", text="ID")
         self.tree.heading("First Name", text="First Name")
+        self.tree.heading("Type Control", text="Type Control")
         self.tree.heading("Last Name", text="Last Name")
         self.tree.grid(row=0, column=0, sticky="nsew")
 

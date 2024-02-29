@@ -21,6 +21,21 @@ class personasSancionadas:
         cursor.execute(sql, (codigo,))
         return cursor.fetchall()
 
+    def personLikeIdentification(self,identification):
+        print("Idenfificacion TEST=> ",identification[0])
+        identification=identification[0]
+        cone=self.abrir()
+        cursor=cone.cursor()
+        sql = """
+          SELECT personas_sancionadas.id,personas_sancionadas_identificaciones.numberidentification,personas_sancionadas.firstname, personas_sancionadas.lastname, personas_sancionadas.typecontrol
+            FROM personas_sancionadas_identificaciones
+            LEFT JOIN personas_sancionadas ON personas_sancionadas_identificaciones.id_person = personas_sancionadas.id
+            WHERE personas_sancionadas_identificaciones.numberidentification LIKE %s;
+
+        """
+        cursor.execute(sql, ('%' + identification + '%',))
+        return cursor.fetchall()
+
     def personByIdentification(self,identification):
         print("Codigo: ",identification)
         cone=self.abrir()
