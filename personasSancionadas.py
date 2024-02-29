@@ -14,7 +14,7 @@ class personasSancionadas:
         return cursor.fetchall()
 
     def identificacionesPersona(self,codigo):
-        print("Codigo: ",codigo)
+        #print("Codigo: ",codigo)
         cone=self.abrir()
         cursor=cone.cursor()
         sql="select * from personas_sancionadas_identificaciones where id_person=%s"
@@ -22,7 +22,7 @@ class personasSancionadas:
         return cursor.fetchall()
 
     def personLikeIdentification(self,identification):
-        print("Idenfificacion TEST=> ",identification[0])
+        #print("Idenfificacion TEST=> ",identification[0])
         identification=identification[0]
         cone=self.abrir()
         cursor=cone.cursor()
@@ -36,21 +36,21 @@ class personasSancionadas:
         cursor.execute(sql, ('%' + identification + '%',))
         return cursor.fetchall()
 
-    def personByIdentification(self,identification):
-        print("Codigo: ",identification)
+    def personLikeName(self,Nombre):
+        #print("Idenfificacion TEST=> ",Nombre[0])
+        Nombre=Nombre[0]
         cone=self.abrir()
         cursor=cone.cursor()
-        sql="select * from personas_sancionadas_identificaciones where numberidentification=%s"
-        cursor.execute(sql, (identification,))
-        identificationPerson=cursor.fetchone()
-        if(identificationPerson):
-            identificationPerson=identificationPerson[4]
-            sql="select * from personas_sancionadas where id=%s"
-            cursor.execute(sql, (identificationPerson,))
-            return cursor.fetchone()
-        else:
-            return None
-        
+        sql = """
+          SELECT personas_sancionadas.id,personas_sancionadas_identificaciones.numberidentification,personas_sancionadas.firstname, personas_sancionadas.lastname, personas_sancionadas.typecontrol
+            FROM personas_sancionadas_identificaciones
+            LEFT JOIN personas_sancionadas ON personas_sancionadas_identificaciones.id_person = personas_sancionadas.id
+            WHERE lastname LIKE %s;
+
+        """
+        cursor.execute(sql, ('%' + Nombre + '%',))
+        return cursor.fetchall()
+
 
     def recuperar_todos(self):
         cone=self.abrir()

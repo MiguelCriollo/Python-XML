@@ -17,7 +17,7 @@ class mainMenu:
 
     def consulta_por_codigo(self):
         self.pagina2 = ttk.Frame(self.cuaderno1)
-        self.cuaderno1.add(self.pagina2, text="Consulta por Nombre")
+        self.cuaderno1.add(self.pagina2, text="Consulta por ID")
         self.labelframe1=ttk.LabelFrame(self.pagina2, text="Persona Sancionada:")
         self.labelframe1.grid(column=0, row=0, padx=5, pady=10)
         self.label1=ttk.Label(self.labelframe1, text="Identificacion:")
@@ -25,16 +25,34 @@ class mainMenu:
         self.entrycodigo=ttk.Entry(self.labelframe1, textvariable=self.codigo)
         self.entrycodigo.grid(column=1, row=0, padx=4, pady=4)
         self.label1.grid(column=0, row=0, padx=4, pady=4)
-        self.boton1=ttk.Button(self.labelframe1, text="Consultar", command=self.consultar)
+        self.boton1=ttk.Button(self.labelframe1, text="Consultar por ID", command=lambda: self.consultar("ID"))
         self.boton1.grid(column=1, row=3, padx=4, pady=4)
 
-    def consultar(self):
-        datos=(self.codigo.get(), )
-        print(datos)
-        respuesta=self.articulo1.personLikeIdentification(datos)
-        print('JSJSJS=>',self.articulo1.personLikeIdentification(datos))
+        # Pestaña de consulta por Nombre
+        self.pagina2 = ttk.Frame(self.cuaderno1)
+        self.cuaderno1.add(self.pagina2, text="Consulta por Nombre")
+        self.labelframe2 = ttk.LabelFrame(self.pagina2, text="Persona Sancionada:")
+        self.labelframe2.grid(column=0, row=0, padx=5, pady=10)
+        self.label2 = ttk.Label(self.labelframe2, text="Nombre:")
+        self.codigo_nombre = tk.StringVar()
+        self.entrynombre = ttk.Entry(self.labelframe2, textvariable=self.codigo_nombre)
+        self.entrynombre.grid(column=1, row=0, padx=4, pady=4)
+        self.label2.grid(column=0, row=0, padx=4, pady=4)
+        self.boton2 = ttk.Button(self.labelframe2, text="Consultar por Nombre", command=lambda: self.consultar("NOMBRE"))
+        self.boton2.grid(column=1, row=3, padx=4, pady=4)
+
+    def consultar(self,type):
+        if(type=="ID"):
+            datos=(self.codigo.get(), )
+            respuesta=self.articulo1.personLikeIdentification(datos)
+        else:
+            datos=(self.codigo_nombre.get(), )
+            print("DATOS=>",datos)
+            respuesta=self.articulo1.personLikeName(datos)
+        
+        #print('JSJSJS=>',self.articulo1.personLikeIdentification(datos))
         if respuesta:
-            print("Fila seleccionada:", respuesta)
+            #print("Fila seleccionada:", respuesta)
             # Crear una ventana
             ventana_resultado = tk.Toplevel()
             ventana_resultado.title("Resultados de la consulta")
@@ -50,9 +68,6 @@ class mainMenu:
 
             # Agregar datos al Treeview
             if respuesta:
-                for row in self.tree.get_children():
-                    self.tree_resultado.delete(row)
-
                 # Insertar datos en la tabla
                 for index, fila in enumerate(respuesta, start=1):
                     self.tree_resultado.insert("", "end", values=fila)
@@ -68,11 +83,11 @@ class mainMenu:
     def on_treeview_click_consulta(self, event):
         item = self.tree_resultado.selection()[0]
         fila_seleccionada = self.tree_resultado.item(item, "values")
-        print("Fila seleccionada:", fila_seleccionada)
+        #print("Fila seleccionada:", fila_seleccionada)
         ventana_detalle = tk.Toplevel()
         ventana_detalle.title("Detalles de Fila")
         identifications=self.articulo1.identificacionesPersona(fila_seleccionada[0])
-        print(identifications)
+        #print(identifications)
         self.mostrarIdentifications(identifications,ventana_detalle)
 
     def listado_completo(self):
@@ -108,11 +123,11 @@ class mainMenu:
     def on_treeview_click(self, event):
         item = self.tree.selection()[0]
         fila_seleccionada = self.tree.item(item, "values")
-        print("Fila seleccionada:", fila_seleccionada)
+        #print("Fila seleccionada:", fila_seleccionada)
         ventana_detalle = tk.Toplevel()
         ventana_detalle.title("Detalles de Fila")
         identifications=self.articulo1.identificacionesPersona(fila_seleccionada[0])
-        print(identifications)
+        #print(identifications)
         self.mostrarIdentifications(identifications,ventana_detalle)
 
     def mostrarIdentifications(self,identifications,ventana):
