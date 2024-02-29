@@ -1,11 +1,11 @@
 import requests 
 from lxml import etree
-import psycopg2
-
-
-
-def main():
-    conn = psycopg2.connect(dbname="postgres", user="postgres", password="admin")
+import xml.etree.ElementTree as ET
+from personasSancionadas import personasSancionadas
+from mainMenu import mainMenu
+conexion=personasSancionadas()
+def databaseStart():
+    conn = conexion.abrir()
     cursor = conn.cursor()
     table_creation = '''
     CREATE TABLE IF NOT EXISTS personas_sancionadas (
@@ -22,10 +22,17 @@ def main():
         id_person INT,
         FOREIGN KEY (id_person) REFERENCES personas_sancionadas(id)
     );
+    CREATE TABLE IF NOT EXISTS personas_sancionadas_ofac (
+        id SERIAL PRIMARY KEY,
+        firstname TEXT NOT NULL,
+        lastname TEXT
+    );
 '''
 
     cursor.execute(table_creation)
-    
+    return cursor,conn
+
+def onuSanctionsDB(cursor):
     url = "https://scsanctions.un.org/resources/xml/sp/consolidated.xml"
 
     response = requests.get(url)
@@ -90,15 +97,45 @@ def main():
                 for identificacion in datos['identifications']:
                      #print(identificacion)
                      cursor.execute("INSERT INTO personas_sancionadas_identificaciones (documentType, numberIdentification, country, id_person) VALUES (%s, %s, %s, %s)", (identificacion['typeDocument'], identificacion['numberDocument'], identificacion['countryDocument'], person_id))
-        conn.commit()
-        cursor.close()
-        conn.close()
+        print("Onu sanctions list successful")
     else:
         print("Error al obtener el documento XML:", response.status_code)
-    #print(data)
 
+def ofacSanctions(cursor):
+    url = "https://www.treasury.gov/ofac/downloads/sdn.xml"
 
-    #cur.execute("INSERT INTO test (num, data) VALUES (%s, %s)",(100, "abc'def"))
+    response = requests.get(url)
+
+    data=[]
+
+    if response.status_code == 200:
+        print("Content Succesfuly Downloaded")
+        xml_content = response.content
+        root = ET.fromstring(xml_content)
+        dn='.//{http://tempuri.org/sdnList.xsd}'
+        sdn_entries = root.findall(dn+'sdnEntry')
+        # Imprimir los resultados
+        for sdn_entry in sdn_entries:
+            person={}
+            person['lastName']=sdn_entry.find(dn+'lastName').text
+            person['firstName']= sdn_entry.find(dn+'firstName').text if sdn_entry.find(dn+'firstName') is not None else ""
+            data.append(person)
+        for datos in data:
+            #print(datos)
+            cursor.execute("INSERT INTO personas_sancionadas_ofac (firstname, lastname) VALUES (%s, %s) RETURNING id",(datos['firstName'], datos['lastName']))
+        print("Onu sanctions list successful")
+    else:
+        print("There has been an error idk")
+            
+
+def main():
+    mainMenu()
+    #cursor,conn=databaseStart()
+    #onuSanctionsDB(cursor)
+    #ofacSanctions(cursor)
+    #conn.commit()
+    #cursor.close()
+    #conn.close()
 
 if __name__== '__main__':
     main()
